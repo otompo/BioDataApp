@@ -48,8 +48,8 @@ function Scan({ navigation }) {
 
   const uploadImage = async () => {
     let img_to_upload = {
-      type: "image/jpeg",
-      name: "image",
+      type: "image/jpg",
+      filename: "image",
       uri: image,
     };
     try {
@@ -58,13 +58,14 @@ function Scan({ navigation }) {
       formData.append("file", img_to_upload);
       formData.append("chance", 1);
 
-      console.log(formData);
+      //console.log(formData);
 
       const response = await axios({
         method: "POST",
         url: `https://codesmartacademy.com/upload`,
         data: formData,
         headers: {
+          "Accept" : "application/json",
           "Content-Type": "multipart/form-data",
         },
         transformRequest: (data, error) => {
@@ -78,7 +79,7 @@ function Scan({ navigation }) {
       }
       setLoading(false);
     } catch (err) {
-      console.log(err.response.data);
+      console.log("ERROR",err);
       setLoading(false);
     }
   };
