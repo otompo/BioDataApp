@@ -58,7 +58,7 @@ function Scan({ navigation }) {
       formData.append("file", img_to_upload);
       formData.append("chance", 1);
 
-      console.log(formData);
+      // console.log(formData);
 
       const response = await axios({
         method: "POST",
