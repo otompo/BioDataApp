@@ -23,7 +23,7 @@ function Settings(props) {
     try {
       setLoading(true);
       const { data } = axios.post(
-        `https://d7b4-154-160-7-153.ngrok.io/api/users`,
+        `https://43ef-41-66-199-195.ngrok.io/api/users`,
         {
           name,
           contactNum,

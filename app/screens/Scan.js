@@ -7,16 +7,18 @@ import {
   ScrollView,
   Alert,
   TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
 import SubmitButton from "../components/button/SubmitButton";
 import colors from "../config/colors";
+import axios from "axios";
 
 function Scan({ navigation }) {
-  const [pickedImagePath, setPickedImagePath] = useState("");
+  const [image, setImage] = useState("");
+  const [loading, setLoading] = useState(false);
   // This function is triggered when the "Open camera" button pressed
-
   const openCamera = async () => {
     // Ask the user for the permission to access the camera
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
@@ -30,25 +32,62 @@ function Scan({ navigation }) {
     // Explore the result
     // console.log(result);
     if (!result.cancelled) {
-      setPickedImagePath(result.uri);
-      // console.log(result.uri);
+      setImage(result.uri);
+      // console.log(result);
     }
   };
 
   const handlePress = () => {
-    if (!pickedImagePath) setPickedImagePath();
+    if (!image) setImage();
     else
       Alert.alert("Delete", "Are you sure you want to delete this image?", [
-        { text: "Yes", onPress: () => setPickedImagePath(null) },
+        { text: "Yes", onPress: () => setImage(null) },
         { text: "No" },
       ]);
+  };
+
+  const uploadImage = async () => {
+    let img_to_upload = {
+      type: "image/jpeg",
+      name: "image",
+      uri: image,
+    };
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("file", img_to_upload);
+      formData.append("chance", 1);
+
+      console.log(formData);
+
+      const response = await axios({
+        method: "POST",
+        url: `https://codesmartacademy.com/upload`,
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        transformRequest: (data, error) => {
+          return formData;
+        },
+      });
+
+      let responseJson = await response.json();
+      if (responseJson) {
+        alert("Upload Successful");
+      }
+      setLoading(false);
+    } catch (err) {
+      console.log(err.response.data);
+      setLoading(false);
+    }
   };
 
   return (
     <ScrollView style={styles.mainContainer}>
       <View style={styles.container}>
         <View style={styles.imageContainer}>
-          {pickedImagePath ? (
+          {image ? (
             <>
               <View style={styles.closeIcon}>
                 <TouchableWithoutFeedback onPress={handlePress}>
@@ -59,7 +98,7 @@ function Scan({ navigation }) {
                   />
                 </TouchableWithoutFeedback>
               </View>
-              <Image source={{ uri: pickedImagePath }} style={styles.image} />
+              <Image source={{ uri: image }} style={styles.image} />
             </>
           ) : (
             <View style={styles.scanContainer}>
@@ -68,7 +107,7 @@ function Scan({ navigation }) {
           )}
         </View>
 
-        {!pickedImagePath ? (
+        {!image ? (
           <SubmitButton
             title="Capture"
             // color="secoundary"
@@ -79,10 +118,13 @@ function Scan({ navigation }) {
           <SubmitButton
             title="Process Captured Image"
             color="green"
-            onPress={() => {
-              navigation.navigate("Result", pickedImagePath);
-              setPickedImagePath("");
-            }}
+            loading={loading}
+            onPress={uploadImage}
+            // onPress={() => {
+            //   uploadImage();
+            //   // navigation.navigate("Result", pickedImagePath);
+            //   // setPickedImagePath("");
+            // }}
           />
         )}
       </View>

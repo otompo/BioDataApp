@@ -1,4 +1,4 @@
-import { StyleSheet, Text, StatusBar, LogBox } from "react-native";
+import { StatusBar, LogBox } from "react-native";
 import RootNavigation from "./app/rootNavigation";
 
 LogBox.ignoreAllLogs(true);
