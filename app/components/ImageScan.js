@@ -31,11 +31,12 @@ function ImageScan({ imageUri, onChangeImage }) {
 
   const selectImage = async () => {
     try {
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.5,
+      const result = await ImagePicker.launchCameraAsync({mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
         base64: true,
-      });
+        aspect: [1, 1],
+        quality: 1,});
+
       if (!result.cancelled) {
         let base64Image = `data:image/jpg;base64,${result.base64}`;
         onChangeImage(base64Image);

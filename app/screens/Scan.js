@@ -13,10 +13,12 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
 import SubmitButton from "../components/button/SubmitButton";
 import colors from "../config/colors";
+import * as FS from "expo-file-system";
+import * as ImageManipulator from 'expo-image-manipulator';
 import axios from "axios";
 
 function Scan({ navigation }) {
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   // This function is triggered when the "Open camera" button pressed
   const openCamera = async () => {
@@ -28,11 +30,15 @@ function Scan({ navigation }) {
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync();
+    const result = await ImagePicker.launchCameraAsync({mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      base64: true,
+      aspect: [1, 1],
+      quality: 1,});
     // Explore the result
-    // console.log(result);
+ 
     if (!result.cancelled) {
-      setImage(result.uri);
+      setImage(result);
       // console.log(result);
     }
   };
@@ -47,37 +53,34 @@ function Scan({ navigation }) {
   };
 
   const uploadImage = async () => {
-    let img_to_upload = {
-      type: "image/jpg",
-      filename: "image",
-      uri: image,
-    };
+    
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append("file", img_to_upload);
-      formData.append("chance", 1);
 
-      //console.log(formData);
+      const manipResult = await ImageManipulator.manipulateAsync(
+        image.uri,
+        [{ resize: { width: 480, height: 640 } }],
+        { format: 'jpeg',base64:true }
+    );
 
-      const response = await axios({
-        method: "POST",
-        url: `https://codesmartacademy.com/upload`,
-        data: formData,
-        headers: {
-          "Accept" : "application/json",
-          "Content-Type": "multipart/form-data",
-        },
-        transformRequest: (data, error) => {
-          return formData;
-        },
+      fetch('https://codesmartacademy.com/upload', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({"file":`${manipResult.base64}`,
+      "chance":1}),
+      })
+      .then(response => response.json())
+      .then(data => {
+        setLoading(false);
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error('Error:', error);
       });
 
-      let responseJson = await response.json();
-      if (responseJson) {
-        alert("Upload Successful");
-      }
-      setLoading(false);
     } catch (err) {
       console.log("ERROR",err);
       setLoading(false);
@@ -87,6 +90,9 @@ function Scan({ navigation }) {
   return (
     <ScrollView style={styles.mainContainer}>
       <View style={styles.container}>
+        <Text>Instructions:</Text>
+        <Text>1. Snap a clean picture without glare or blur</Text>
+        <Text>2. Crop the image to the size of the fingerprint</Text>
         <View style={styles.imageContainer}>
           {image ? (
             <>
@@ -99,7 +105,7 @@ function Scan({ navigation }) {
                   />
                 </TouchableWithoutFeedback>
               </View>
-              <Image source={{ uri: image }} style={styles.image} />
+              <Image source={{ uri: image.uri }} style={styles.image} />
             </>
           ) : (
             <View style={styles.scanContainer}>

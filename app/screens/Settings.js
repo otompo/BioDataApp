@@ -4,6 +4,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import AppTextInput from "../components/AppTextInput";
 import SubmitButton from "../components/button/SubmitButton";
 import ImageInputList from "../components/ImageInputList";
+import * as ImageManipulator from 'expo-image-manipulator';
 import axios from "axios";
 
 function Settings(props) {
@@ -18,10 +19,36 @@ function Settings(props) {
   const handleRemove = (uri) => {
     setImageUris(imageUris.filter((imageUri) => imageUri !== uri));
   };
-
+//TODO: the server URL and other static constants can be added to an env file
   const handleSubmit = async () => {
     try {
       setLoading(true);
+      const manipResult = await ImageManipulator.manipulateAsync(
+        imageUris[0],
+        [{ resize: { width: 201, height: 250 } }],
+        { format: 'jpeg',base64:true }
+    );
+
+      fetch('https://codesmartacademy.com/upload/authorize', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({"file":`${manipResult.base64}`,
+      "chance":1}),
+      })
+      .then(response => response.json())
+      .then(data => {
+        setLoading(false);
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error('Error:', error);
+      });
+
+//after uploading then you send the user details to the server
+     
       const { data } = axios.post(
         `https://43ef-41-66-199-195.ngrok.io/api/users`,
         {
