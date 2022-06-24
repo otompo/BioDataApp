@@ -5,20 +5,19 @@ import ListItems from "../components/ListItem";
 import colors from "../config/colors";
 import * as Progress from "react-native-progress";
 import axios from "axios";
+import moment from "moment";
 
 function Result({ route }) {
-  const pickedImagePath = route.params;
-  let file = pickedImagePath;
+  const data = route.params;
+  let file = data;
   let formdata = new FormData();
   const chance = 1;
   formdata.append(file, chance);
   // console.log(formdata);
   const [matchProgress, setMatchProgress] = useState("");
+  const [scanDate, setScanDate] = useState(new Date());
   const [notMatchProgress, setNotMatchProgress] = useState("");
   const [progress, setProgress] = useState(0.2);
-  useEffect(() => {
-    // handleScan();
-  });
 
   const handleScan = async () => {
     try {
@@ -36,36 +35,41 @@ function Result({ route }) {
   return (
     <SafeAreaView style={styles.mainContainer}>
       <View style={styles.dataScan}>
-        <Text>{file}</Text>
+        <Text
+          style={{ fontSize: 50, fontWeight: "700", fontStyle: "italic" }}
+        >{`${data.toFixed(0)}%`}</Text>
       </View>
-      <View style={styles.iconContainer}>
-        <Progress.Bar
-          animated={true}
-          color={colors.green}
-          progress={progress}
-          width={200}
-        />
-      </View>
-      <View>
-        <ListItems date="16/10/2022" match="match" percent="90%" />
+
+      {data && data >= 30 ? (
+        <View>
+          <ListItems
+            date={`${moment(scanDate).format("ll")}`}
+            match="Match"
+            percent={`${data.toFixed(0)}%`}
+          />
+        </View>
+      ) : (
         <ListItems
-          date="16/10/2022"
-          match="not match"
-          percent="30%"
+          date={`${moment(scanDate).format("ll")}`}
+          match="Not Match"
+          percent={data}
           bordercolor="danger"
         />
-      </View>
+      )}
       <View style={styles.iconContainer}>
-        <MaterialCommunityIcons
-          name="check-circle"
-          size={40}
-          color={colors.green}
-        />
-        <MaterialCommunityIcons
-          name="close-circle"
-          size={40}
-          color={colors.danger}
-        />
+        {data && data >= 30 ? (
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={40}
+            color={colors.green}
+          />
+        ) : (
+          <MaterialCommunityIcons
+            name="close-circle"
+            size={40}
+            color={colors.danger}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -74,10 +78,6 @@ function Result({ route }) {
 export default Result;
 
 const styles = StyleSheet.create({
-  // mainContainer: {
-  //   flex: 1,
-  //   backgroundColor: "#eeeff00",
-  // },
   dataScan: {
     backgroundColor: colors.light,
     height: "50%",

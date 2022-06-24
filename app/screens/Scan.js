@@ -13,8 +13,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
 import SubmitButton from "../components/button/SubmitButton";
 import colors from "../config/colors";
-import * as FS from "expo-file-system";
-import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImageManipulator from "expo-image-manipulator";
 import axios from "axios";
 
 function Scan({ navigation }) {
@@ -30,13 +29,15 @@ function Scan({ navigation }) {
       return;
     }
 
-    const result = await ImagePicker.launchCameraAsync({mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       base64: true,
       aspect: [1, 1],
-      quality: 1,});
+      quality: 1,
+    });
     // Explore the result
- 
+
     if (!result.cancelled) {
       setImage(result);
       // console.log(result);
@@ -53,36 +54,35 @@ function Scan({ navigation }) {
   };
 
   const uploadImage = async () => {
-    
     try {
       setLoading(true);
 
       const manipResult = await ImageManipulator.manipulateAsync(
         image.uri,
         [{ resize: { width: 480, height: 640 } }],
-        { format: 'jpeg',base64:true }
-    );
+        { format: "jpeg", base64: true }
+      );
 
-      fetch('https://codesmartacademy.com/upload', {
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({"file":`${manipResult.base64}`,
-      "chance":1}),
+      fetch("https://codesmartacademy.com/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ file: `${manipResult.base64}`, chance: 1 }),
       })
-      .then(response => response.json())
-      .then(data => {
-        setLoading(false);
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error:', error);
-      });
-
+        .then((response) => response.json())
+        .then((data) => {
+          setLoading(false);
+          // console.log("Success:", data);
+          navigation.navigate("Result", data.data);
+          setImage("");
+        })
+        .catch((error) => {
+          setLoading(false);
+          console.error("Error:", error);
+        });
     } catch (err) {
-      console.log("ERROR",err);
+      console.log("ERROR", err);
       setLoading(false);
     }
   };
