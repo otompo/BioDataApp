@@ -19,19 +19,6 @@ function Result({ route }) {
   const [notMatchProgress, setNotMatchProgress] = useState("");
   const [progress, setProgress] = useState(0.2);
 
-  const handleScan = async () => {
-    try {
-      const { data } = await axios.post(
-        `http://18.237.213.168:8000/upload`,
-        file,
-        chance
-      );
-      // console.log(data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.mainContainer}>
       <View style={styles.dataScan}>
