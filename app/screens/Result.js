@@ -24,7 +24,7 @@ function Result({ route }) {
       <View style={styles.dataScan}>
         <Text
           style={{ fontSize: 50, fontWeight: "700", fontStyle: "italic" }}
-        >{`${data.toFixed(0)}%`}</Text>
+        >{`${data?.toFixed(0)}%`}</Text>
       </View>
 
       {data && data >= 30 ? (

@@ -59,7 +59,7 @@ function Scan({ navigation }) {
 
       const manipResult = await ImageManipulator.manipulateAsync(
         image.uri,
-        [{ resize: { width: 480, height: 640 } }],
+        [{ resize: { width: 201, height: 250 } }],
         { format: "jpeg", base64: true }
       );
 

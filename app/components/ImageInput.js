@@ -33,12 +33,14 @@ function ImageInput({ imageUri, onChangeImage }) {
     try {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.5,
+        allowsEditing: true,
         base64: true,
+        aspect: [1, 1],
+        quality: 1,
       });
       if (!result.cancelled) {
         let base64Image = `data:image/jpg;base64,${result.base64}`;
-        onChangeImage(base64Image);
+        onChangeImage(base64Image,result.uri);
       }
     } catch (error) {
       console.log("Error reading an image", error);
@@ -55,7 +57,7 @@ function ImageInput({ imageUri, onChangeImage }) {
             size={40}
           />
         )}
-        {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
+        {imageUri && <Image source={{ uri: imageUri.uri }} style={styles.image} />}
       </View>
     </TouchableWithoutFeedback>
   );
