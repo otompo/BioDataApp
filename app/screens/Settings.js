@@ -33,9 +33,10 @@ function Settings(props) {
 const getData = async () => {
   try {
     const jsonValue = await AsyncStorage.getItem(key)
+    console.log(jsonValue.name)
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch(e) {
-    console.log("Error retrieving data")
+    console.log("Error retrieving data",e)
     // error reading value
     return false
   }
