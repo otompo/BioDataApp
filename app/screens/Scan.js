@@ -13,6 +13,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
 import SubmitButton from "../components/button/SubmitButton";
 import colors from "../config/colors";
+import * as FileSystem from 'expo-file-system'
 import * as ImageManipulator from "expo-image-manipulator";
 import axios from "axios";
 
@@ -31,10 +32,9 @@ function Scan({ navigation }) {
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
       base64: true,
-      aspect: [1, 1],
-      quality: 1,
+      quality: 1
+      
     });
     // Explore the result
 
@@ -56,35 +56,73 @@ function Scan({ navigation }) {
   const uploadImage = async () => {
     try {
       setLoading(true);
-
+     
+      // const manipResult = await ImageManipulator.manipulateAsync(
+      //   image.uri,
+      //   { format: "jpeg", base64: true }
+      // );
       const manipResult = await ImageManipulator.manipulateAsync(
         image.uri,
-        [{ resize: { width: 201, height: 250 } }],
-        { format: "jpeg", base64: true }
-      );
+        [{ resize: { width: 1024, height: 767 } }],
+        { format: 'jpeg' }
+    );
+      //const formData = new FormData;
+      //formData.append("image",image.uri.replace("file:///","file://"))
 
-      fetch("https://codesmartacademy.com/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ file: `${manipResult.base64}`, chance: 1 }),
-      })
-        .then((response) => response.json())
+      //console.log(image.uri.replace("file:///","file://"))
+      // const response = await axios({
+      //   method: "POST",
+      //   url: "https://fingerauth.link/upload",
+      //   data: formData,
+      //   headers: { "Content-Type": "multipart/form-data" },
+      // });
+      // //const out = await axios.post("https://fingerauth.link/upload",formData,{headers:{"Content-Type": "multipart/form-data"}})
+      // console.log(response)
+      var formdata = new FormData();
+      formdata.append("image",manipResult.uri.replace("file:///","file://"));
+
+      const file = {
+        uri:manipResult.uri,             // e.g. 'file:///path/to/file/image123.jpg'
+        name:"image3.jpg",            // e.g. 'image123.jpg',
+        type:"image/jpg"             // e.g. 'image/jpg'
+      }
+      
+      const body = new FormData()
+      body.append('image', file)
+      
+      fetch("https://fingerauth.link/upload", {
+        timeout:360,
+        method: 'POST',
+        body
+      }).then((response) => {
+        return response.json()
+        })
         .then((data) => {
           setLoading(false);
-          // console.log("Success:", data);
-          navigation.navigate("Result", data.data);
+          console.log("Success:", data);
+          if(data.data === -1){
+            setLoading(false)
+            Alert.alert("Unable to extract fingerprint fetures from image. Please capture an image with clear fingerprints")
+          }else{
+            navigation.navigate("Result", data.data);
+          }
+         
           setImage("");
         })
         .catch((error) => {
           setLoading(false);
           console.error("Error:", error);
         });
+
+     
+     
     } catch (err) {
       console.log("ERROR", err);
       setLoading(false);
     }
+    // finally{
+    //   setLoading(false)
+    // }
   };
 
   return (

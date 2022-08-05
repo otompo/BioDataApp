@@ -120,7 +120,9 @@ const getData = async () => {
       showsHorizontalScrollIndicator={false}
       style={styles.container}
     >
-      <View>
+
+    <View><Text>Authorized fingerprints are handled by the backend only</Text></View>
+      {/* <View>
         <ImageInputList
           imageUris={imageUris}
           onAddImage={handleAdd}
@@ -165,7 +167,7 @@ const getData = async () => {
           <Image source={{ uri: userData.imageUris[0].uri }} style={styles.image} />
         </View>
         }
-      </View>
+      </View> */}
     </KeyboardAwareScrollView>
   );
 }
