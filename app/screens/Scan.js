@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  Dimensions,
   TouchableWithoutFeedback,
   Platform,
 } from "react-native";
@@ -16,6 +17,8 @@ import colors from "../config/colors";
 import * as FileSystem from 'expo-file-system'
 import * as ImageManipulator from "expo-image-manipulator";
 import axios from "axios";
+
+const {width,height} = Dimensions.get("screen");
 
 function Scan({ navigation }) {
   const [image, setImage] = useState(null);
@@ -31,6 +34,22 @@ function Scan({ navigation }) {
     }
 
     const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      base64: true,
+      quality: 1
+      
+    });
+    // Explore the result
+
+    if (!result.cancelled) {
+      setImage(result);
+      // console.log(result);
+    }
+  };
+
+  const openLibrary = async () => {
+    // Ask the user for the permission to access the camera
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       base64: true,
       quality: 1
@@ -64,7 +83,7 @@ function Scan({ navigation }) {
       const manipResult = await ImageManipulator.manipulateAsync(
         image.uri,
         [{ resize: { width: 1024, height: 767 } }],
-        { format: 'jpeg' }
+        { format: 'jpeg'}
     );
       //const formData = new FormData;
       //formData.append("image",image.uri.replace("file:///","file://"))
@@ -126,11 +145,11 @@ function Scan({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.mainContainer}>
+    <ScrollView style={styles.mainContainer} contentContainerStyle={{height:height}}>
       <View style={styles.container}>
         <Text>Instructions:</Text>
         <Text>1. Snap a clean picture without glare or blur</Text>
-        <Text>2. Crop the image to the size of the fingerprint</Text>
+       
         <View style={styles.imageContainer}>
           {image ? (
             <>
@@ -153,24 +172,28 @@ function Scan({ navigation }) {
         </View>
 
         {!image ? (
+          <View style={{display:'flex',width:'100%',alignItems:'center',justifyContent:'center',flexDirection:'column',justifyContent:'space-evenly'}}>
           <SubmitButton
             title="Capture"
             // color="secoundary"
             width="70%"
             onPress={openCamera}
           />
+          <SubmitButton
+          title="Pick Image"
+          // color="secoundary"
+          width="70%"
+          onPress={openLibrary}
+          />
+          </View>
         ) : (
           <SubmitButton
             title="Process Captured Image"
             color="green"
             loading={loading}
             onPress={uploadImage}
-            // onPress={() => {
-            //   uploadImage();
-            //   // navigation.navigate("Result", pickedImagePath);
-            //   // setPickedImagePath("");
-            // }}
           />
+          
         )}
       </View>
     </ScrollView>
@@ -183,10 +206,11 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: "#eee",
+    //height: height + 100
   },
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
 
